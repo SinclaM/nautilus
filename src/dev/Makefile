@@ -32,3 +32,4 @@ endif
 
 obj-$(NAUT_CONFIG_GPIO) += gpio.o
 
+obj-$(NAUT_CONFIG_HDA_PCI) += hda_pci.o

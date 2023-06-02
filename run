@@ -10,8 +10,8 @@ make ramdisk.img
 rm -f src/asm/ramdisk.o
 
 if test -e "ramdisk.img"; then
-    make isoimage && qemu-system-x86_64 -smp 2 -m 2048 -vga virtio -serial stdio -boot d -cdrom nautilus.iso -parallel file:parport.out -drive file=ramdisk.img,if=virtio
+    make isoimage && qemu-system-x86_64 -smp 2 -m 2048 -vga virtio -serial stdio -boot d -cdrom nautilus.iso -parallel file:parport.out -drive file=ramdisk.img,if=virtio -device intel-hda -device hda-duplex
 else
-    make isoimage && qemu-system-x86_64 -smp 2 -m 2048 -vga virtio -serial stdio -boot d -cdrom nautilus.iso -parallel file:parport.out
+    make isoimage && qemu-system-x86_64 -smp 2 -m 2048 -vga virtio -serial stdio -boot d -cdrom nautilus.iso -parallel file:parport.out -device intel-hda -device hda-duplex
 fi
 

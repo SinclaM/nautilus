@@ -81,8 +81,7 @@ void input_handler() {
     while (true);
 }
 
-int run_doom(struct nk_gpu_dev* gpu_dev,
-             nk_gpu_dev_box_t* box) {
+int run_doom(struct nk_gpu_dev* d, nk_gpu_dev_box_t* box) {
     doom_init(0, NULL, 0);
     nk_gpu_dev_bitmap_t* bitmap = malloc((sizeof(nk_gpu_dev_bitmap_t) + 4 * N * N * SCREENWIDTH * SCREENHEIGHT));
     bitmap->width = N * SCREENWIDTH;
@@ -102,8 +101,8 @@ int run_doom(struct nk_gpu_dev* gpu_dev,
             }
         }
 
-        nk_gpu_dev_graphics_fill_box_with_bitmap(gpu_dev, box, bitmap, NK_GPU_DEV_BIT_BLIT_OP_COPY);
-        nk_gpu_dev_flush(gpu_dev);
+        nk_gpu_dev_graphics_fill_box_with_bitmap(d, box, bitmap, NK_GPU_DEV_BIT_BLIT_OP_COPY);
+        nk_gpu_dev_flush(d);
     }
 
     free(bitmap);
@@ -112,25 +111,25 @@ int run_doom(struct nk_gpu_dev* gpu_dev,
 }
 
 static int handle_doom (char * buf, void * priv) {
-    char* gpu_name = "virtio-gpu0";
-    struct nk_gpu_dev *gpu_dev;
+    char* name = "virtio-gpu0";
+    struct nk_gpu_dev *d;
     nk_gpu_dev_video_mode_t modes[MAX_MODES], prevmode, *curmode;
     uint32_t nummodes=MAX_MODES;
 
     nk_fs_lfs_attach("virtio-blk0", "rootfs", 0);
 
-    if (!(gpu_dev=nk_gpu_dev_find(gpu_name))) { 
-        nk_vc_printf("Can't find %s\n",gpu_name);
+    if (!(d=nk_gpu_dev_find(name))) { 
+        nk_vc_printf("Can't find %s\n",name);
         return -1;
     }
 
-    if (nk_gpu_dev_get_mode(gpu_dev,&prevmode)) {
+    if (nk_gpu_dev_get_mode(d,&prevmode)) {
         nk_vc_printf("Can't get mode\n");
         return -1;
     }
 
-    if (nk_gpu_dev_get_available_modes(gpu_dev,modes,&nummodes)) {
-        nk_vc_printf("Can't get available modes from %s\n",gpu_name);
+    if (nk_gpu_dev_get_available_modes(d,modes,&nummodes)) {
+        nk_vc_printf("Can't get available modes from %s\n",name);
         return -1;
     }
 
@@ -146,7 +145,7 @@ static int handle_doom (char * buf, void * priv) {
         return -1;
     }
 
-    if (nk_gpu_dev_set_mode(gpu_dev,&modes[sel])) {
+    if (nk_gpu_dev_set_mode(d,&modes[sel])) {
         nk_vc_printf("Failed to set graphics mode....\n");
         return -1;
     }
@@ -156,7 +155,7 @@ static int handle_doom (char * buf, void * priv) {
                                      .y = (curmode->height - N * SCREENHEIGHT) / 2,
                                      .width = N * SCREENWIDTH,
                                      .height = N * SCREENHEIGHT};
-    nk_gpu_dev_graphics_set_clipping_box(gpu_dev, &clipping_box);
+    nk_gpu_dev_graphics_set_clipping_box(d, &clipping_box);
 
     // Change default bindings to modern mapping
     doom_set_default_int("key_up",          DOOM_KEY_W);
@@ -168,9 +167,9 @@ static int handle_doom (char * buf, void * priv) {
     doom_set_default_int("key_right",       DOOM_KEY_L);
     doom_set_default_int("key_fire",        DOOM_KEY_SPACE);
     doom_set_default_int("mouse_move",      0); // Mouse will not move forward
-                                                //
+
     nk_thread_start(input_handler, NULL, NULL, 1, TSTACK_DEFAULT, 0, 1);
-    run_doom(gpu_dev, &clipping_box);
+    run_doom(d, &clipping_box);
 
     return 0;
 }

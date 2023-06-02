@@ -50,7 +50,6 @@ obj-y += \
         fs.o \
         loader.o \
         shell.o \
-		sounddev.o \
 	fprintk.o \
         dtoa.o \
 	module.o \

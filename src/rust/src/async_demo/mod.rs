@@ -1,50 +1,52 @@
 use crate::prelude::*;
-use crate::task::{Task, executor::Executor};
-use crate::task::utils::yield_now;
+use crate::kernel::task::{Task, executor::Executor};
+use crate::kernel::task::utils::yield_now;
 use crate::kernel::timer;
+use core::time::Duration;
 
-make_logging_macros!("async");
-
+make_logging_macros!("async_demo");
 
 fn kernel_main() {
     let mut executor = Executor::new();
-    executor.spawn(Task::new(example_task_1()));
-    executor.spawn(Task::new(example_task_2()));
-    executor.spawn(Task::new(example_task_3()));
+
+    vc_println!("Spawning 100 async tasks...");
+
+    // Spawn 100 async tasks
+    for i in 0..99 {
+        let dur = Duration::from_secs_f32(generate_random_f32(0.0, 10.0));
+        executor.spawn(Task::new(async_task(i, dur)));
+    }
+
+
     executor.run(true); // This will now return once all tasks are done
 }
 
-async fn async_number() -> u32 {
-    let ns = 5 * 1_000_000_000; // 5 seconds in nanoseconds
-    let start = timer::get_realtime(); // get the current time
+/// Generate a random floating point number
+///
+/// Eventually this should be brought into a `rand` module
+/// (with an API similar to the standard lib probably).
+fn generate_random_f32(min: f32, max: f32) -> f32 {
+    // SAFETY: FFI call.
+    let scale = unsafe { 
+        (super::kernel::bindings::rand() as f32) / (super::kernel::bindings::RAND_MAX as f32)
+    };
+    min + scale * ( max - min )
+}
+
+async fn async_number(task_num: u64, dur: Duration) -> u32 {
+    let ns = dur.as_nanos() as u64;
+    let start = timer::get_realtime();
     while timer::get_realtime() < start + ns {
-        yield_now().await; // yield control to allow other tasks to run
+        yield_now().await;
     }
-    42
+    task_num as u32 // return the simulated result of the async task
 }
 
-async fn example_task_1() {
-    vc_println!("Hello from example task 1!\nI'm a blocking task to show the timer!\nWaiting 3 seconds...");
-    let ns = 3 * 1_000_000_000; // 3 seconds in nanoseconds
-    timer::sleep(ns); // sleep for 3 seconds
-    vc_println!("Done sleeping!");
-    vc_println!("blocking number 1: {}", 8086);
-}
-
-async fn example_task_2() {
-    vc_println!("Hello from example task 2! Waiting 5 seconds...");
-    let number = async_number().await;
-    vc_println!("async number 2: {}", number);
-}
-
-async fn async_number_3() -> u32 {
-    69
-}
-
-async fn example_task_3() {
-    vc_println!("Hello from example task 3! Number will return now...");
-    let number = async_number_3().await;
-    vc_println!("async number 3: {}", number);
+// This is the async task that will be spawned
+async fn async_task(task_num: u64, dur: Duration) {
+    vc_println!("Hello from async task {}! Waiting for {} secs...", task_num, dur.as_secs_f32());
+    let num = async_number(task_num, dur).await;
+    vc_println!("Async task {} done!", num);
 }
 
 register_shell_command!("rust_async", "rust_async", |_| {

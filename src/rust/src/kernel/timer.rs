@@ -20,13 +20,12 @@
 ///
 /// let timer = Timer::new("my_timer");
 /// ```
-extern crate cstr_core;
-use cstr_core::CString;
-
 use core::ffi::c_void;
+use alloc::ffi::CString;
 
 use super::bindings;
 
+#[derive(Debug)]
 pub struct Timer {
     timer: *mut bindings::nk_timer_t,
 }
@@ -45,7 +44,13 @@ impl Timer {
         }
     }
 
-    pub fn set(
+    /// # Safety
+    ///
+    /// The data behind `priv_data` will not be overwritten as a result of
+    /// this call, although the C function being called will create an alias to it.
+    /// This timer API as a whole needs to be improved--if you are coming across this
+    /// because you need this functionality, you may want to make something more idiomatic.
+    pub unsafe fn set(
         &self,
         ns: u64,
         flags: u64,
@@ -53,6 +58,8 @@ impl Timer {
         priv_data: *mut c_void,
         cpu: i32,
     ) -> i32 {
+
+
         // SAFETY: `nk_timer_set` expects a valid timer pointer, which is guaranteed by the
         // `new` function. The other arguments are passed directly from the caller.
         unsafe {
@@ -111,36 +118,6 @@ pub fn get_thread_default() -> Option<Timer> {
     } else {
         Some(Timer { timer })
     }
-}
-
-pub fn sleep(ns: u64) -> i32 {
-    // SAFETY: `nk_sleep` is a simple function that takes a single argument. There are no
-    // safety concerns as long as the argument is a valid u64.
-    unsafe { bindings::nk_sleep(ns) }
-}
-
-pub fn delay(ns: u64) -> i32 {
-    // SAFETY: `nk_delay` is a simple function that takes a single argument. There are no
-    // safety concerns as long as the argument is a valid u64.
-    unsafe { bindings::nk_delay(ns) }
-}
-
-pub fn init() -> i32 {
-    // SAFETY: `nk_timer_init` is a simple function that takes no arguments. There are no
-    // safety concerns as long as the underlying C library is correctly implemented.
-    unsafe { bindings::nk_timer_init() }
-}
-
-pub fn deinit() {
-    // SAFETY: `nk_timer_deinit` is a simple function that takes no arguments. There are no
-    // safety concerns as long as the underlying C library is correctly implemented.
-    unsafe { bindings::nk_timer_deinit() }
-}
-
-pub fn dump_timers() {
-    // SAFETY: `nk_timer_dump_timers` is a simple function that takes no arguments. There are no
-    // safety concerns as long as the underlying C library is correctly implemented.
-    unsafe { bindings::nk_timer_dump_timers() }
 }
 
 pub fn get_realtime() -> u64 {

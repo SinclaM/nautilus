@@ -1,8 +1,12 @@
 [package]
 name = "nk_rust"
-version = "0.0.0"
+version = "0.1.0"
 edition = "2021"
 authors = [
+    "Matthew Sinclair <matthewsinclair2024@u.northwestern.edu>",
+    "Conor Kotwasinski <conorkotwasinski2024@u.northwestern.edu>",
+    "Ian Armstrong <ianarmstrong2022@u.northwestern.edu>",
+    "Charles Zhou <charleszhou2023@u.northwestern.edu>",
     "Michael Polinski <michaelp@u.northwestern.edu>",
     "Hanming Wang <hanmingwang2022@u.northwestern.edu>",
     "Qingwei Lan <qingweilan2022@u.northwestern.edu>",
@@ -20,7 +24,6 @@ bitfield = "0.14.0"
 x86_64 = "0.14.10"
 lock_api = "0.4.9"
 paste = "1.0.12"
-cstr_core = "0.2.6"
 
 [dependencies.lazy_static]
 version = "1.4.0"

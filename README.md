@@ -1,3 +1,9 @@
+__For an overview of the Rust infrastructure added in this fork, see [the project paper](doc/Enhancing_Rust_Support_in_the_Nautilus_Aerokernel.pdf).__
+
+<img width="745" alt="paper" src="https://github.com/SinclaM/nautilus/assets/82351204/96cba629-841e-497d-a5b7-b2705f77f6d2">
+
+___
+
 ![Nautilus Logo](http://cs.iit.edu/~khale/nautilus/img/nautilus_logo.png "Nautilus Logo")
 [![Build Status](https://travis-ci.com/HExSA-Lab/nautilus.svg?branch=master)](https://travis-ci.com/HExSA-Lab/nautilus)
 [![Coverity Scan Build Status](https://scan.coverity.com/projects/17390/badge.svg)](https://scan.coverity.com/projects/hexsa-lab-nautilus)
